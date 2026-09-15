@@ -1,0 +1,74 @@
+#!/bin/sh
+set -eu
+
+page="${1:-mas-velocity-last-3-sprints.html}"
+
+rg -q 'class="sprint-chart-grid"' "$page"
+rg -q 'class="contributor-matrix"' "$page"
+rg -q 'Current sprint: MAS - 2026.09.22' "$page"
+rg -q 'class="panel sprint-evidence kevin-only"' "$page"
+rg -Fq '@media(max-width:500px){.contributor-matrix{grid-template-columns:75px repeat(4,56px)' "$page"
+rg -q 'class="wispr-infographic"' "$page"
+rg -q 'id="wispr-streak-map"' "$page"
+rg -q '>411,373<' "$page"
+rg -q '>9 days ' "$page"
+github_line=$(rg -n 'class="adoption-card github-card"' "$page" | cut -d: -f1)
+wispr_line=$(rg -n 'class="adoption-card wispr-card"' "$page" | cut -d: -f1)
+test -n "$github_line"
+test -n "$wispr_line"
+test "$github_line" -lt "$wispr_line"
+rg -Fq '.adoption-grid{grid-template-columns:1fr}' "$page"
+rg -Fq '.adoption-grid,.adoption-card{min-width:0}' "$page"
+rg -q 'class="gauge-rank"' "$page"
+rg -q 'id="wpm-gradient"' "$page"
+rg -q '432 contributions since April' "$page"
+rg -Fq 'for (let day = 0; day < 189;' "$page"
+rg -Fq '.github-card .contribution-map{grid-auto-columns:6px;grid-template-rows:repeat(7,6px);gap:2px}' "$page"
+rg -Fq '.github-card .heatmap-summary{display:block}' "$page"
+rg -q 'src="assets/wispr-book-stack.png"' "$page"
+rg -q 'class="book-equivalent">About four books<' "$page"
+rg -q 'class="gauge-rank">Top 0.2%<' "$page"
+rg -Fq '.gauge-rank{position:absolute;top:18px' "$page"
+rg -q '>GitHub activity since joining SNHU<' "$page"
+rg -Fq '.github-card .contribution-map,.wispr-card .wispr-streak-grid{grid-auto-columns:22px' "$page"
+rg -q 'class="role-title">Senior AI Software Engineer<' "$page"
+rg -Fq '.map-legend,.streak-legend{justify-content:center}' "$page"
+rg -q '>AI Engineering Leadership &amp; Enablement<' "$page"
+rg -q 'class="enablement-flow"' "$page"
+rg -q 'class="conference-slide featured"' "$page"
+rg -q 'src="assets/ai-engineer-slide-20.png"' "$page"
+rg -q 'src="assets/ai-engineer-slide-19.png"' "$page"
+rg -q 'src="assets/ai-engineer-slide-01.png"' "$page"
+rg -q '>20<.*Slides delivered<' "$page"
+rg -q '>19<.*>Ticket Playbook skills<' "$page"
+rg -q '>6,494<.*>Tracked text lines<' "$page"
+rg -q '>37<.*>Implementation &amp; docs commits<' "$page"
+rg -q '>22<.*>PR merges<' "$page"
+rg -q 'August 25.*September 14, 2026' "$page"
+rg -q 'https://github.com/MAS-SNHU/mas-ticket-playbook-exp' "$page"
+rg -Fq '.enablement-grid{display:grid;grid-template-columns:1fr' "$page"
+talk_line=$(rg -n 'class="talk-card"' "$page" | cut -d: -f1)
+playbook_line=$(rg -n 'class="playbook-card"' "$page" | cut -d: -f1)
+test "$talk_line" -lt "$playbook_line"
+rg -Fq '.slide-gallery{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"cover factory" "final final"' "$page"
+rg -q 'href="assets/AI-Engineer-2026-Takeaways.pdf"' "$page"
+rg -q 'View full presentation' "$page"
+rg -Fq "document.querySelectorAll('a').forEach" "$page"
+rg -Fq "link.target = '_blank'" "$page"
+rg -Fq "link.rel = 'noopener noreferrer'" "$page"
+
+sprint_block=$(sed -n '/<section class="panel sprint-evidence kevin-only">/,/<\/section>/p' "$page")
+if printf '%s\n' "$sprint_block" | rg -q 'Gerard|repeating-linear-gradient'; then
+  echo "Kevin-only sprint charts must not include Gerard or striped marks" >&2
+  exit 1
+fi
+
+sprint_block=$(sed -n '/<section class="panel sprint-evidence">/,/<\/section>/p' "$page")
+rollup_block=$(sed -n '/<section class="panel contributor-rollup">/,/<\/section>/p' "$page")
+
+if printf '%s\n%s\n' "$sprint_block" "$rollup_block" | rg -q '<table'; then
+  echo "comparison sections must use charts, not tables" >&2
+  exit 1
+fi
+
+echo "dashboard structure checks passed"

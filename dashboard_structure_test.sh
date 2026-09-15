@@ -56,6 +56,28 @@ rg -q 'View full presentation' "$page"
 rg -Fq "document.querySelectorAll('a').forEach" "$page"
 rg -Fq "link.target = '_blank'" "$page"
 rg -Fq "link.rel = 'noopener noreferrer'" "$page"
+if rg -q 'class="talk-takeaway"' "$page"; then
+  echo "redundant closing-idea bar must be removed" >&2
+  exit 1
+fi
+rg -Fq '.conference-slide figcaption{left:auto;right:18px;bottom:16px' "$page"
+rg -Fq 'font-size:27px' "$page"
+rg -Fq 'border:3px solid' "$page"
+rg -Fq '.conference-slide:not(.featured) figcaption{font-size:14px' "$page"
+rg -Fq '.conference-slide.featured figcaption{font-size:27px' "$page"
+rg -q 'class="adoption-card codex-card"' "$page"
+rg -q '>Codex usage via CodexBar<' "$page"
+rg -q '>1.59B<' "$page"
+rg -q '>20<.*Active days<' "$page"
+rg -q '>100<.*Conversations<' "$page"
+rg -q '>96.9%<.*Cached input<' "$page"
+rg -q '>gpt-5.6-sol<.*Top model<' "$page"
+rg -q 'id="codex-usage-bars"' "$page"
+codex_block=$(sed -n '/<article class="adoption-card codex-card">/,/<\/article>/p' "$page")
+if printf '%s\n' "$codex_block" | rg -q '\$|cost|spend'; then
+  echo "Codex usage panel must not include money metrics" >&2
+  exit 1
+fi
 
 sprint_block=$(sed -n '/<section class="panel sprint-evidence kevin-only">/,/<\/section>/p' "$page")
 if printf '%s\n' "$sprint_block" | rg -q 'Gerard|repeating-linear-gradient'; then

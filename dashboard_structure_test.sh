@@ -47,6 +47,14 @@ rg -q '>Model-agnostic workflow system<' "$page"
 rg -q '>Claude compatible<' "$page"
 rg -q '>Codex compatible<' "$page"
 rg -Fq '.playbook-supporting{display:grid;grid-template-columns:repeat(3,1fr)' "$page"
+rg -q 'human-in-the-loop, AI-augmented workflow that accelerates tickets' "$page"
+rg -q 'class="skill-catalog"' "$page"
+skill_count=$(rg -o 'class="skill-pill"' "$page" | wc -l | tr -d ' ')
+test "$skill_count" -eq 19
+for skill in ticket-playbook ticket-factory jira-ticket-ops mas-story-point-estimation ticket-clarification impact-analysis hld-design-doc implement-in-worktree runtime-preflight release-change-register create-pr verify-runtime-behavior verify-with-browser qa-verification-steps pr-comment-tracking mas-platform-review-gate cross-model-review-gate mas-tshirt-sizing worktree-cleanup; do
+  rg -q ">${skill}<" "$page"
+done
+rg -Fq '.playbook-models span{padding:9px 14px' "$page"
 rg -q '>6,494<.*>Tracked text lines<' "$page"
 rg -q '>37<.*>Implementation &amp; docs commits<' "$page"
 rg -q '>22<.*>PR merges<' "$page"

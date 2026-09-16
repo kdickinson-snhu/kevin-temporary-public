@@ -63,6 +63,16 @@ done
 rg -Fq '.playbook-models span{padding:9px 14px' "$page"
 rg -Fq '.gauge-rank{top:7px' "$page"
 rg -Fq 'border:3px solid #fff' "$page"
+rg -q 'class="card secondary-metric"' "$page"
+rg -q 'class="panel secondary-metric".*Completed-sprint repository line changes' "$page"
+rg -q 'class="sprint-chart secondary-metric".*Changed repository lines' "$page"
+rg -q 'Implementation scale only — not a measure of performance or value' "$page"
+rg -Fq '.secondary-metric{filter:saturate(.18)' "$page"
+tldr=$(sed -n '/<section class="panel tldr">/,/<\/section>/p' "$page")
+if printf '%s' "$tldr" | rg -qi 'changed lines'; then
+  echo "TLDR must not foreground changed lines" >&2
+  exit 1
+fi
 rg -q '>6,494<.*>Tracked text lines<' "$page"
 rg -q '>37<.*>Implementation &amp; docs commits<' "$page"
 rg -q '>22<.*>PR merges<' "$page"

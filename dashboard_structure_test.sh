@@ -64,6 +64,11 @@ rg -Fq '.playbook-models span{padding:9px 14px' "$page"
 rg -Fq '.gauge-rank{top:7px' "$page"
 rg -Fq 'border:3px solid #fff' "$page"
 rg -q 'class="card secondary-metric"' "$page"
+secondary_card=$(sed -n '/<div class="card secondary-metric">/,/<\/div>[[:space:]]*<\/div>/p' "$page" | head -1)
+if printf '%s' "$secondary_card" | rg -q 'rank-badge|>Context<'; then
+  echo "Secondary changed-lines card must not use the floating rank badge" >&2
+  exit 1
+fi
 rg -q 'class="panel secondary-metric".*Completed-sprint repository line changes' "$page"
 rg -q 'class="sprint-chart secondary-metric".*Changed repository lines' "$page"
 rg -q 'Implementation scale only — not a measure of performance or value' "$page"
